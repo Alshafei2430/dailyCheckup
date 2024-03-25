@@ -1,0 +1,18 @@
+image
+
+tasks:
+  - command: cd ./backend
+  - command: npx json-server db.json -p 5000
+  - command: cd ./../frontend
+  - command: yarn dev
+
+ports:
+  - name: PostgreSQL server
+    port: 5432
+    onOpen: ignore
+  - name: frontend
+    port: 3000
+    onOpen: open-browser
+  - name: backend
+    port: 5000
+    onOpen: ignore
