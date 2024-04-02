@@ -37,6 +37,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { User } from "@prisma/client";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -45,7 +48,7 @@ const formSchema = z.object({
   status: z.string().min(1, {
     message: "قم بإدخال التمام",
   }),
-  unit: z.string().min(1, {
+  militaryUnit: z.string().min(1, {
     message: "قم بإدخال الوحدة",
   }),
   lastArrivalDate: z.date({
@@ -54,26 +57,40 @@ const formSchema = z.object({
   durationSinceLastArrivalDate: z.number(),
 });
 
-export function UpdateOfficierModal() {
+export async function UpdateOfficierModal({
+  officierId,
+}: {
+  officierId?: string;
+}) {
+  const router = useRouter();
+  if (!officierId) {
+    return;
+  }
+  const officier = (await axios.get(`/users/${officierId}`)) as User;
+
   const { isOpen, onClose } = useUpdateOfficerModal();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      unit: "",
-      status: "",
+      name: officier.name,
+      militaryUnit: officier.militaryUnit,
+      status: officier.status,
       durationSinceLastArrivalDate: undefined,
     },
   });
 
   const isLoading = form.formState.isSubmitting;
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    toast.success("تم الحفظ بنجاح");
-    form.reset();
-    onClose();
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      console.log(values);
+      await axios.post(`/api/users/${officierId}`, values);
+      toast.success("تم الحفظ بنجاح");
+      router.refresh();
+      form.reset();
+      onClose();
+    } catch (error) {}
   }
 
   return (
@@ -109,7 +126,7 @@ export function UpdateOfficierModal() {
             />
             <FormField
               control={form.control}
-              name="unit"
+              name="militaryUnit"
               render={({ field }) => (
                 <FormItem className="flex items-center gap-x-2">
                   <FormLabel>الوحدة</FormLabel>
@@ -176,7 +193,6 @@ export function UpdateOfficierModal() {
                         disabled={(date) =>
                           date > new Date() || date < new Date("1900-01-01")
                         }
-                        initialFocus
                         locale={ar}
                       />
                     </PopoverContent>

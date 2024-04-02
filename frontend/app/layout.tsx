@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" dir="rtl">
-      <body className={cairo.className}>
+      <body className={`${cairo.className} bg-neutral-100`}>
         <ToastProvider />
         <ModalProvider />
         {children}

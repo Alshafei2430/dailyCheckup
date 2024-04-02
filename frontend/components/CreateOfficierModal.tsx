@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import axios from "axios";
 
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { toast } from "react-hot-toast";
@@ -39,19 +40,21 @@ import {
 } from "@/components/ui/popover";
 
 const formSchema = z.object({
+  rank: z.string().min(1, {
+    message: "قم بإدخال الرتبة",
+  }),
   name: z.string().min(1, {
     message: "قم بإدخال الاسم",
+  }),
+  militaryUnit: z.string().min(1, {
+    message: "قم بإدخال الوحدة",
   }),
   status: z.string().min(1, {
     message: "قم بإدخال التمام",
   }),
-  unit: z.string().min(1, {
-    message: "قم بإدخال الوحدة",
-  }),
   lastArrivalDate: z.date({
     required_error: "قم باختيار تاريخ أخر عودة",
   }),
-  durationSinceLastArrivalDate: z.number(),
 });
 
 export function CreateOfficierModal() {
@@ -60,20 +63,29 @@ export function CreateOfficierModal() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      rank: "",
       name: "",
-      unit: "",
+      militaryUnit: "",
       status: "",
-      durationSinceLastArrivalDate: undefined,
     },
   });
 
   const isLoading = form.formState.isSubmitting;
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
-    toast.success("تم الحفظ بنجاح");
-    form.reset();
-    onClose();
+    try {
+      const user = await axios.post("/api/users", {
+        ...values,
+        rankType: "ضابط",
+      });
+      console.log({ user });
+      toast.success("تم الحفظ بنجاح");
+      form.reset();
+      onClose();
+    } catch (error) {
+      toast.error("حدث خطاء");
+    }
   }
 
   return (
@@ -89,6 +101,24 @@ export function CreateOfficierModal() {
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4 px-6"
           >
+            <FormField
+              control={form.control}
+              name="rank"
+              render={({ field }) => (
+                <FormItem className="flex items-center gap-x-2">
+                  <FormLabel>الرتبة</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={isLoading}
+                      className=""
+                      placeholder="ادخل الرتبة"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="name"
@@ -109,7 +139,7 @@ export function CreateOfficierModal() {
             />
             <FormField
               control={form.control}
-              name="unit"
+              name="militaryUnit"
               render={({ field }) => (
                 <FormItem className="flex items-center gap-x-2">
                   <FormLabel>الوحدة</FormLabel>
@@ -176,7 +206,6 @@ export function CreateOfficierModal() {
                         disabled={(date) =>
                           date > new Date() || date < new Date("1900-01-01")
                         }
-                        initialFocus
                         locale={ar}
                       />
                     </PopoverContent>
