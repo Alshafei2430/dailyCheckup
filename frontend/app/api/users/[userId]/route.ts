@@ -23,13 +23,12 @@ export async function GET(
   }
 }
 
-export async function PATCH(
+export async function PUT(
   req: Request,
   { params }: { params: { userId: string } }
 ) {
   try {
-    const { values } = await req.json();
-
+    const updateData = await req.json();
     const user = await db.user.findUnique({
       where: {
         id: params.userId,
@@ -45,10 +44,9 @@ export async function PATCH(
         id: params.userId,
       },
       data: {
-        ...values,
+        ...updateData,
       },
     });
-
     return NextResponse.json(updatedUser);
   } catch (error) {
     console.log("[USER_ID]", error);

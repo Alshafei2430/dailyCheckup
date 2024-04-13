@@ -1,15 +1,16 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { ColumnDef } from "@tanstack/react-table";
-
 import { HiOutlinePencilAlt } from "react-icons/hi";
 
-import useUpdateOfficerModal from "@/hooks/useUpdateOfficerModal";
-import useOfficiers from "@/hooks/useOfficiers";
 import { differenceInCalendarDays, format } from "date-fns";
+import { ar } from "date-fns/locale";
 
 import type { User } from "@prisma/client";
+import { ColumnDef } from "@tanstack/react-table";
+
+import { Button } from "@/components/ui/button";
+
+import useUpdateOfficerModal from "@/hooks/useUpdateOfficerModal";
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -42,7 +43,7 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const lastArrivalDate = row.getValue("lastArrivalDate") as Date;
       const lastArrivalDateFormatted = format(lastArrivalDate, "dd/MM");
-      const lastArrivalDay = format(lastArrivalDate, "EEEE");
+      const lastArrivalDay = format(lastArrivalDate, "EEEE", { locale: ar });
       return (
         <div className="flex flex-col justify-center">
           <span>{lastArrivalDay}</span>
@@ -67,21 +68,22 @@ export const columns: ColumnDef<User>[] = [
     accessorKey: "actions",
     header: () => <div className="text-right">Actions</div>,
     cell: ({ row }) => {
-      const { onOpen, setOfficierId } = useUpdateOfficerModal();
-
+      const { onOpen, isOpen, setOfficer } = useUpdateOfficerModal();
       const openUpdateModal = () => {
-        const userId = row.getValue("id") as string;
-        if (userId) {
-          setOfficierId(userId);
-          onOpen();
-        }
+        const currentUser = {
+          id: row.getValue("id"),
+          rank: row.getValue("rank"),
+          name: row.getValue("name"),
+          militaryUnit: row.getValue("militaryUnit"),
+          status: row.getValue("status"),
+          lastArrivalDate: row.getValue("lastArrivalDate"),
+        } as User;
+        console.log({ currentUser });
+        setOfficer(currentUser);
+        onOpen();
       };
       return (
-        <Button
-          variant="ghost"
-          className="flex gap-x-2"
-          onClick={openUpdateModal}
-        >
+        <Button className="flex gap-x-2" onClick={openUpdateModal}>
           <span>تعديل</span>
           <HiOutlinePencilAlt />
         </Button>

@@ -1,12 +1,14 @@
 "use client";
 
+import { Plus } from "lucide-react";
+
+import type { User } from "@prisma/client";
+
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
-import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import useCreateOfficierModal from "@/hooks/useCreateOfficerModal";
-import type { User } from "@prisma/client";
 
 export default function OfficiersTable({ data }: { data: User[] }) {
   const { onOpen } = useCreateOfficierModal();

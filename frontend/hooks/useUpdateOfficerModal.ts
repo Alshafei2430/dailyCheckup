@@ -1,18 +1,20 @@
+import { User } from "@prisma/client";
 import { create } from "zustand";
 
 interface UpdateOfficerModalStore {
   isOpen: boolean;
-  officerId?: string;
+  officer: User | null;
   onOpen: () => void;
   onClose: () => void;
-  setOfficierId: (id: string) => void;
+  setOfficer: (officer: User) => void;
 }
 
 const useUpdateOfficerModal = create<UpdateOfficerModalStore>((set) => ({
   isOpen: false,
+  officer: null,
   onOpen: () => set({ isOpen: true }),
   onClose: () => set({ isOpen: false }),
-  setOfficierId: (id: string) => set({ officerId: id }),
+  setOfficer: (officer) => set({ officer }),
 }));
 
 export default useUpdateOfficerModal;

@@ -1,12 +1,12 @@
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import axios from "axios";
-
-import { CalendarIcon } from "@radix-ui/react-icons";
 import { toast } from "react-hot-toast";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
+import { CalendarIcon } from "@radix-ui/react-icons";
 
 import { cn } from "@/lib/utils";
 import useCreateOfficerModal from "@/hooks/useCreateOfficerModal";
@@ -58,6 +58,8 @@ const formSchema = z.object({
 });
 
 export function CreateOfficierModal() {
+  const router = useRouter();
+
   const { isOpen, onClose } = useCreateOfficerModal();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -73,7 +75,6 @@ export function CreateOfficierModal() {
   const isLoading = form.formState.isSubmitting;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
     try {
       const user = await axios.post("/api/users", {
         ...values,
@@ -83,6 +84,7 @@ export function CreateOfficierModal() {
       toast.success("تم الحفظ بنجاح");
       form.reset();
       onClose();
+      router.refresh();
     } catch (error) {
       toast.error("حدث خطاء");
     }
